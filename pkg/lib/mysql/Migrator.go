@@ -39,7 +39,7 @@ func (m *migrator) CreateTable() error {
 	defer driver.Close()
 
 	sqls := []string{
-		"CREATE TABLE `migrations` (`id` int(10) UNSIGNED NOT NULL, `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL, `batch` int(11) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+		"CREATE TABLE `migrations` (`id` int(10) UNSIGNED NOT NULL, `migration` varchar(255) NOT NULL, `batch` int(11) NOT NULL);",
 		"ALTER TABLE `migrations` ADD PRIMARY KEY (`id`);",
 		"ALTER TABLE `migrations` MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;",
 	}
