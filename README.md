@@ -106,9 +106,9 @@ $ go-migrate new <filename>
 
 The `new` command will create a migration file, filename has the following rules:
 
-* create_`<table>`_table: 
-* xxx_to_`<table>`_table:
-* otherwise:
+* create_`<table>`_table: Generate a migration file, Up() includes `Schema.Create` and Down() includes `Schema.DropIfExists`.
+* xxx_to_`<table>`_table: Generate a migration file, Up() and Down() includes `Schema.Table` both.
+* otherwise: Generate a bare migration file which only Up() and Down().
 
 ## migrate
 ```
