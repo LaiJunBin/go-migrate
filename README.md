@@ -35,7 +35,7 @@ $ go mod init <module-path>
 $ go-migrate init mysql
 ```
 
-4. Open `cmd/migrate.go` to set your database config or immediately execute migrate operation.
+4. Open `cmd/migrate/migrate.go` to set your database config or immediately execute migrate operation.
 ```
 $ go-migrate migrate
 ```
@@ -85,7 +85,7 @@ func (t *UsersTable) Down() error {
 }
 ```
 
-Also, you can modify DatabaseConfig in `cmd/migrate.go`.
+Also, you can modify DatabaseConfig in `cmd/migrate/migrate.go`.
 
 The default like follows:
 ```go
