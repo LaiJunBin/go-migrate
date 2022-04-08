@@ -15,12 +15,12 @@ func main() {
 		return
 	}
 
-	if _, err := os.Stat("cmd/migrate.go"); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat("cmd/migrate/migrate.go"); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Error: please run 'go-migrate init'.")
 		return
 	}
 
-	args := []string{"run", "cmd/migrate.go"}
+	args := []string{"run", "cmd/migrate/migrate.go"}
 	args = append(args, os.Args[1:]...)
 
 	b, err := exec.Command("go", args...).Output()

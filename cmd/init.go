@@ -23,11 +23,11 @@ func getModuleName() (string, error) {
 }
 
 func createMigrateCMD(db string, moduleName string) error {
-	if err := os.MkdirAll("cmd", os.ModePerm); err != nil {
+	if err := os.MkdirAll("cmd/migrate", os.ModePerm); err != nil {
 		return fmt.Errorf("can't make directory. \n%v", err)
 	}
 
-	if err := ioutil.WriteFile("cmd/migrate.go", []byte(fmt.Sprintf(templates.MigrateTemplate, db, moduleName)), 0666); err != nil {
+	if err := ioutil.WriteFile("cmd/migrate/migrate.go", []byte(fmt.Sprintf(templates.MigrateTemplate, db, moduleName)), 0666); err != nil {
 		return fmt.Errorf("can't create migrate file. \n%v", err)
 	}
 
