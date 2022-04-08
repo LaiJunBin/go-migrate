@@ -5,10 +5,11 @@ import (
 	"strings"
 
 	"github.com/laijunbin/go-migrate/pkg/interfaces"
+	mysql_interfaces "github.com/laijunbin/go-migrate/pkg/lib/mysql/interfaces"
 )
 
-type schema struct {
-}
+type schema struct{}
+type Schema_test struct{}
 
 func newSchema() interfaces.Schema {
 	return &schema{}
@@ -19,6 +20,15 @@ func (s *schema) Create(table string, schemaFunc func(interfaces.Blueprint)) err
 	if err != nil {
 		return err
 	}
+
+	return createWithDriver(driver, table, schemaFunc)
+}
+
+func (s *Schema_test) Create(driver mysql_interfaces.Driver, table string, schemaFunc func(interfaces.Blueprint)) error {
+	return createWithDriver(driver, table, schemaFunc)
+}
+
+func createWithDriver(driver mysql_interfaces.Driver, table string, schemaFunc func(interfaces.Blueprint)) error {
 	defer driver.Close()
 
 	blueprint := NewBlueprint().(*Blueprint)
@@ -43,6 +53,15 @@ func (s *schema) Table(table string, schemaFunc func(interfaces.Blueprint)) erro
 	if err != nil {
 		return err
 	}
+
+	return tableWithDriver(driver, table, schemaFunc)
+}
+
+func (s *Schema_test) Table(driver mysql_interfaces.Driver, table string, schemaFunc func(interfaces.Blueprint)) error {
+	return tableWithDriver(driver, table, schemaFunc)
+}
+
+func tableWithDriver(driver mysql_interfaces.Driver, table string, schemaFunc func(interfaces.Blueprint)) error {
 	defer driver.Close()
 
 	blueprint := NewBlueprint().(*Blueprint)
@@ -79,10 +98,18 @@ func (s *schema) DropIfExists(table string) error {
 	if err != nil {
 		return err
 	}
-	defer driver.Close()
 
+	return dropIfExistsWithDriver(driver, table)
+}
+
+func (s *Schema_test) DropIfExists(driver mysql_interfaces.Driver, table string) error {
+	return dropIfExistsWithDriver(driver, table)
+}
+
+func dropIfExistsWithDriver(driver mysql_interfaces.Driver, table string) error {
+	defer driver.Close()
 	sql := fmt.Sprintf("DROP TABLE IF EXISTS %s;", table)
-	_, err = driver.Execute(sql)
+	_, err := driver.Execute(sql)
 	return err
 }
 
