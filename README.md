@@ -153,6 +153,7 @@ The `refresh` command will rollback all migrate operations and re-run all migrat
 	* [Migrator](#migrator)
 	* [Schema](#schema)
 	* [Blueprint](#blueprint)
+	* [ForeignBlueprint](#foreignblueprint)
 
 # Model
 
@@ -229,8 +230,16 @@ type Blueprint interface {
 	Boolean(name string) Blueprint
 	DateTime(name string) Blueprint
 	Nullable() Blueprint
+	Unique(column ...string) Blueprint
+	Index(column ...string) Blueprint
 	Default(value interface{}) Blueprint
+	Foreign(name string) ForeignBlueprint
+	Primary(name ...string) Blueprint
 	DropColumn(column string)
+	DropUnique(name string)
+	DropIndex(name string)
+	DropForeign(name string)
+	DropPrimary()
 	Timestamps()
 }
 ```
@@ -244,9 +253,32 @@ The interface defines follows:
 * Boolean: Create a `boolean` equivalent column.
 * DateTime: Create a `datetime` equivalent column.
 * Nullable: The columns that are created will be `nullable`
+* Unique: Create an index, it is unique.
+* Index: Create an index.
 * Default: Set a default value to the column.
+* Foreign: Create a foreign key, more information is below: [ForeignBlueprint](#foreignblueprint)
+* Primary: Create primary key, support composite keys.
 * DropColumn: Drop a column.
+* DropUnique: Same as DropIndex.
+* DropIndex: Drop a index.
+* DropForeign: Drop a foreign key and index.
+* DropPrimary: Drop primary key.
 * Timestamps: Create created_at field with the current time as default and updated_at TIMESTAMP equivalent columns.  
+
+## ForeignBlueprint
+```go
+type ForeignBlueprint interface {
+	Reference(name string) ForeignBlueprint
+	On(table string) ForeignBlueprint
+	OnUpdate(action string) ForeignBlueprint
+	OnDelete(action string) ForeignBlueprint
+}
+```
+The interface defines follows: 
+* Reference: Set the foreign key reference column.
+* On: Set the reference table.
+* OnUpdate: Set onUpdate action.
+* OnDelete: Set onDelete action.
 
 # These APIs how interact?
 * `Command` uses `Migrator` to check migrations status and calls `Migration`.

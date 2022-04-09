@@ -27,7 +27,7 @@ func checkSqlsMatch(t *testing.T, sqls []string, expectedSqls []string) {
 	})
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateUsersTable(t *testing.T) {
 	driver, _ := mysql.NewMockDriver()
 	defer checkDriverClosed(t, driver)
 
@@ -54,7 +54,33 @@ func TestCreate(t *testing.T) {
 	checkSqlsMatch(t, sqls, expectedSqls)
 }
 
-func TestTable(t *testing.T) {
+func TestCreateProductsTable(t *testing.T) {
+	driver, _ := mysql.NewMockDriver()
+	defer checkDriverClosed(t, driver)
+
+	schema := &mysql.Schema_test{}
+	schema.Create(driver, "products", func(table interfaces.Blueprint) {
+		table.String("id", 20)
+		table.Primary("id")
+		table.Integer("user_id", 10)
+		table.Foreign("user_id").Reference("id").On("users").OnUpdate("cascade").OnDelete("cascade")
+		table.Integer("category_id", 10).Index()
+		table.Boolean("enable").Default(1)
+		table.Timestamps()
+	})
+
+	expectedSqls := []string{
+		"CREATE TABLE `products` (`id` VARCHAR(20) NOT NULL, PRIMARY KEY (`id`), `user_id` INT(10) NOT NULL, CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `category_id` INT(10) NOT NULL, INDEX (`category_id`), `enable` TINYINT NOT NULL DEFAULT '1', `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT NULL);",
+	}
+
+	sqls := driver.GetSqls()
+
+	t.Logf("sqls: %v", sqls)
+
+	checkSqlsMatch(t, sqls, expectedSqls)
+}
+
+func TestAlterUsersTable(t *testing.T) {
 	driver, _ := mysql.NewMockDriver()
 	defer checkDriverClosed(t, driver)
 
@@ -68,6 +94,31 @@ func TestTable(t *testing.T) {
 
 	expectedSqls := []string{
 		"ALTER TABLE `users` ADD `name` INT(10) NOT NULL, ADD `price` VARCHAR(100) NOT NULL, DROP `description`, DROP `enable`;",
+	}
+
+	sqls := driver.GetSqls()
+
+	t.Logf("sqls: %v", sqls)
+
+	checkSqlsMatch(t, sqls, expectedSqls)
+}
+
+func TestAlterProductsTable(t *testing.T) {
+	driver, _ := mysql.NewMockDriver()
+	defer checkDriverClosed(t, driver)
+
+	schema := &mysql.Schema_test{}
+	schema.Table(driver, "products", func(table interfaces.Blueprint) {
+		table.Integer("price", 10)
+		table.DropPrimary()
+		table.DropForeign("user_id")
+		table.DropIndex("category_id")
+
+		table.Index("user_id")
+	})
+
+	expectedSqls := []string{
+		"ALTER TABLE `products` ADD `price` INT(10) NOT NULL, DROP PRIMARY KEY, DROP FOREIGN KEY `fk_user_id`, DROP INDEX `fk_user_id`, DROP INDEX `category_id`, ADD INDEX (`user_id`);",
 	}
 
 	sqls := driver.GetSqls()

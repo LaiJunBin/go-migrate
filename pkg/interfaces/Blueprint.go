@@ -9,7 +9,15 @@ type Blueprint interface {
 	Boolean(name string) Blueprint
 	DateTime(name string) Blueprint
 	Nullable() Blueprint
+	Unique(column ...string) Blueprint
+	Index(column ...string) Blueprint
 	Default(value interface{}) Blueprint
+	Foreign(name string) ForeignBlueprint
+	Primary(name ...string) Blueprint
 	DropColumn(column string)
+	DropUnique(name string)
+	DropIndex(name string)
+	DropForeign(name string)
+	DropPrimary()
 	Timestamps()
 }
