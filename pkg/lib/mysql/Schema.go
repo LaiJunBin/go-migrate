@@ -10,21 +10,21 @@ import (
 type schema struct{}
 type Schema_test struct{}
 
-func newSchema() interfaces.Schema {
+func newSchema() interfaces.SchemaWithSeeder {
 	return &schema{}
 }
 
-func (s *schema) Create(table string, schemaFunc func(interfaces.Blueprint)) error {
+func (s *schema) Create(table string, schemaFunc func(interfaces.Blueprint)) interfaces.Seeder {
 	driver, err := NewDriver()
 	if err != nil {
-		return err
+		return NewSeeder("", err)
 	}
 
-	return createWithDriver(driver, table, schemaFunc)
+	return NewSeeder(table, createWithDriver(driver, table, schemaFunc))
 }
 
-func (s *Schema_test) Create(driver mysql_interfaces.Driver, table string, schemaFunc func(interfaces.Blueprint)) error {
-	return createWithDriver(driver, table, schemaFunc)
+func (s *Schema_test) Create(driver mysql_interfaces.Driver, table string, schemaFunc func(interfaces.Blueprint)) interfaces.Seeder {
+	return NewTestSeeder(driver, table, createWithDriver(driver, table, schemaFunc))
 }
 
 func createWithDriver(driver mysql_interfaces.Driver, table string, schemaFunc func(interfaces.Blueprint)) error {

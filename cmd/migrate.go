@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/laijunbin/go-migrate/config"
+	"github.com/laijunbin/go-migrate/pkg/interfaces"
 	"github.com/spf13/cobra"
 )
 
@@ -46,8 +47,16 @@ var migrateCmd = &cobra.Command{
 				}
 			}
 			if err := v.Up(); err != nil {
-				fmt.Println("Error: ", err)
-				os.Exit(1)
+				e, ok := err.(interfaces.Seeder)
+				if ok {
+					if e.Error() != "" {
+						fmt.Println("Error: ", err)
+						os.Exit(1)
+					}
+				} else {
+					fmt.Println("Error: ", err)
+					os.Exit(1)
+				}
 			}
 			if err := migrator.WriteRecord(migration, batch+1); err != nil {
 				fmt.Println("Error: ", err)

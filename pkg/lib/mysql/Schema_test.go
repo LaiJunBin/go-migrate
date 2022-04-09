@@ -168,3 +168,37 @@ func TestDropIfExists(t *testing.T) {
 
 	checkSqlsMatch(t, sqls, expectedSqls)
 }
+
+func TestCreateUsersTableAndSeed(t *testing.T) {
+	driver, _ := mysql.NewMockDriver()
+	defer checkDriverClosed(t, driver)
+
+	schema := &mysql.Schema_test{}
+	schema.Create(driver, "users", func(table interfaces.Blueprint) {
+		table.Id("id", 10)
+		table.String("username", 100)
+		table.String("password", 100)
+		table.Timestamps()
+	}).Seed([]map[string]interface{}{
+		{
+			"username": "admin",
+			"password": "1234",
+		},
+		{
+			"username": "user01",
+			"password": "1234",
+		},
+	}...)
+
+	expectedSqls := []string{
+		"CREATE TABLE `users` (`id` INT(10) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`id`), `username` VARCHAR(100) NOT NULL, `password` VARCHAR(100) NOT NULL, `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT NULL);",
+		"INSERT INTO `users` (`password`, `username`) VALUES ('1234', 'admin');",
+		"INSERT INTO `users` (`password`, `username`) VALUES ('1234', 'user01');",
+	}
+
+	sqls := driver.GetSqls()
+
+	t.Logf("sqls: %v", sqls)
+
+	checkSqlsMatch(t, sqls, expectedSqls)
+}
