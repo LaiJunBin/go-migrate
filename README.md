@@ -7,6 +7,7 @@
 * [Quick start](#quick-start)
 * [Commands](#commands)
 * [API](#api)
+* [Example](#example)
 * [These APIs how interact?](#these-apis-how-interact)
 
 # Install
@@ -148,10 +149,13 @@ The `refresh` command will rollback all migrate operations and re-run all migrat
 # API
 * [Model](#model)
 	* [Migration](#migration-model)
+	* [Seeder](#seeder-model)
 * [Interface](#interface)
 	* [Migration](#migration-interface)
 	* [Migrator](#migrator)
 	* [Schema](#schema)
+	* [SchemaWithSeeder](#schemawithseeder)
+	* [Seeder](#seeder)
 	* [Blueprint](#blueprint)
 	* [ForeignBlueprint](#foreignblueprint)
 
@@ -167,6 +171,48 @@ type Migration struct {
 ```
 
 The model represents a row of migration records.
+
+## Seeder Model
+```go
+package model
+
+type Seeder struct {
+	Err error
+}
+
+func (s *Seeder) Error() string {
+	if s.Err == nil {
+		return ""
+	}
+
+	return s.Err.Error()
+}
+
+func NewSeeder(err error) *Seeder {
+	return &Seeder{
+		Err: err,
+	}
+}
+```
+
+This is just a model it implements Error interface, actually it has nothing to do Seeder interface, just convenient customize Seeder, for example below:
+
+Example:
+```go
+type seeder struct {
+	*model.Seeder
+	table string
+}
+
+func NewSeeder(table string, err error) interfaces.Seeder {
+	return &seeder{
+		Seeder: model.NewSeeder(err),
+		table:  table,
+	}
+}
+```
+
+More information can see interface: [Seeder](#seeder)
 
 # Interface
 
@@ -218,6 +264,33 @@ The interface defines follows:
 * Create: Define how to create the table and execute it.
 * Table: Define how to alter the table and execute it.
 * DropIfExists: Drop table if exists.
+
+## SchemaWithSeeder
+```go
+package interfaces
+
+type SchemaWithSeeder interface {
+	Create(table string, schemaFunc func(Blueprint)) Seeder
+	Table(table string, schemaFunc func(Blueprint)) error
+	DropIfExists(table string) error
+}
+```
+
+This interface basically the same as Schema, but its Create function will return the Seeder interface.
+
+## Seeder
+```go
+package interfaces
+
+type Seeder interface {
+	error
+	Seed(data ...map[string]interface{}) error
+}
+```
+
+The interface defines follows: 
+* error: Because user probably don't use seeder, so it will return this error.
+* Seed: Define how to seed.
 
 ## Blueprint
 ```go
@@ -279,6 +352,103 @@ The interface defines follows:
 * On: Set the reference table.
 * OnUpdate: Set onUpdate action.
 * OnDelete: Set onDelete action.
+
+
+# Example
+Assume use mysql as example.
+
+* [CreateTable](#create-table)
+* [AlterTable](#alter-table)
+* [Foreign](#foreign)
+* [Seeding](#seeding)
+
+## Create table
+```go
+mysql.Schema.Create("users", func(table interfaces.Blueprint) {
+	table.Id("id", 10)
+	table.String("username", 100)
+	table.String("password", 100)
+	table.Timestamps()
+})
+```
+
+The above will generate the following sql:
+```sql
+CREATE TABLE `users`(
+    `id` INT(10) NOT NULL AUTO_INCREMENT, PRIMARY KEY(`id`),
+    `username` VARCHAR(100) NOT NULL,
+    `password` VARCHAR(100) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL
+);
+```
+
+## Alter table
+```go
+schema.Table("users", func(table interfaces.Blueprint) {
+	table.Boolean("is_admin")
+	table.String("email", 100).Unique()
+})
+```
+
+The above will generate the following sql:
+```sql
+ALTER TABLE `users` 
+	ADD `is_admin` TINYINT NOT NULL,
+    ADD `email` VARCHAR(100) NOT NULL,
+    ADD UNIQUE(`email`);
+```
+
+## Foreign
+```go
+schema.Table("projects", func(table interfaces.Blueprint) {
+	table.Integer("user_id", 10)
+	table.Foreign("user_id").Reference("id").On("users").OnUpdate("cascade")
+})
+```
+
+The above will generate the following sql:
+```sql
+ALTER TABLE `projects` 
+	ADD `user_id` INT(10) NOT NULL,
+    ADD CONSTRAINT `fk_user_id` FOREIGN KEY(`user_id`) REFERENCES `users`(`id`) ON UPDATE CASCADE;
+```
+
+## Seeding
+
+The Seeder function is bound after the Create function.
+
+You can pass one param or multiple params as seeder data.
+```go
+schema.Create("users", func(table interfaces.Blueprint) {
+	table.Id("id", 10)
+	table.String("username", 100)
+	table.String("password", 100)
+	table.Timestamps()
+}).Seed([]map[string]interface{}{
+	{
+		"username": "admin",
+		"password": "1234",
+	},
+	{
+		"username": "user02",
+		"password": "1234",
+	},
+}...)
+```
+
+The above will generate the following sql:
+```sql
+CREATE TABLE `users`(
+    `id` INT(10) NOT NULL AUTO_INCREMENT, PRIMARY KEY(`id`),
+    `username` VARCHAR(100) NOT NULL,
+    `password` VARCHAR(100) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL
+);
+INSERT INTO `users`(`password`, `username`) VALUES('1234', 'admin');
+INSERT INTO `users`(`password`, `username`) VALUES('1234', 'user02');
+```
 
 # These APIs how interact?
 * `Command` uses `Migrator` to check migrations status and calls `Migration`.
