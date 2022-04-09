@@ -2,15 +2,12 @@ package mysql
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/laijunbin/go-migrate/pkg/interfaces"
 )
 
 type Blueprint struct {
-	alters      []string
-	columns     []string
-	dropColumns []string
+	metadata []*meta
 }
 
 func NewBlueprint() interfaces.Blueprint {
@@ -18,67 +15,97 @@ func NewBlueprint() interfaces.Blueprint {
 }
 
 func (bp *Blueprint) Id(name string, length int) {
-	bp.columns = append(bp.columns, fmt.Sprintf("`%s` INT(%d) NOT NULL", name, length))
-	bp.alters = append(bp.alters, fmt.Sprintf("ADD PRIMARY KEY (`%s`)", name))
-	bp.alters = append(bp.alters, fmt.Sprintf("MODIFY `%s` INT(%d) NOT NULL AUTO_INCREMENT", name, length))
+	bp.metadata = append(bp.metadata, &meta{
+		Name:          name,
+		Type:          "INT",
+		Length:        length,
+		AutoIncrement: true,
+		Primary:       true,
+	})
 }
 
 func (bp *Blueprint) String(name string, length int) interfaces.Blueprint {
-	bp.columns = append(bp.columns, fmt.Sprintf("`%s` VARCHAR(%d) NOT NULL", name, length))
+	bp.metadata = append(bp.metadata, &meta{
+		Name:   name,
+		Type:   "VARCHAR",
+		Length: length,
+	})
 	return bp
 }
 
 func (bp *Blueprint) Text(name string) interfaces.Blueprint {
-	bp.columns = append(bp.columns, fmt.Sprintf("`%s` TEXT NOT NULL", name))
+	bp.metadata = append(bp.metadata, &meta{
+		Name: name,
+		Type: "TEXT",
+	})
 	return bp
 }
 
 func (bp *Blueprint) Integer(name string, length int) interfaces.Blueprint {
-	bp.columns = append(bp.columns, fmt.Sprintf("`%s` INT(%d) NOT NULL", name, length))
+	bp.metadata = append(bp.metadata, &meta{
+		Name:   name,
+		Type:   "INT",
+		Length: length,
+	})
 	return bp
 }
 
 func (bp *Blueprint) Date(name string) interfaces.Blueprint {
-	bp.columns = append(bp.columns, fmt.Sprintf("`%s` DATE NOT NULL", name))
+	bp.metadata = append(bp.metadata, &meta{
+		Name: name,
+		Type: "DATE",
+	})
 	return bp
 }
 
 func (bp *Blueprint) Boolean(name string) interfaces.Blueprint {
-	bp.columns = append(bp.columns, fmt.Sprintf("`%s` TINYINT NOT NULL", name))
+	bp.metadata = append(bp.metadata, &meta{
+		Name: name,
+		Type: "TINYINT",
+	})
 	return bp
 }
 
 func (bp *Blueprint) DateTime(name string) interfaces.Blueprint {
-	bp.columns = append(bp.columns, fmt.Sprintf("`%s` DATETIME NOT NULL", name))
+	bp.metadata = append(bp.metadata, &meta{
+		Name: name,
+		Type: "DATETIME",
+	})
 	return bp
 }
 
 func (bp *Blueprint) Timestamps() {
-	bp.columns = append(bp.columns, "`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME NULL")
+	bp.metadata = append(bp.metadata, &meta{
+		Name:    "created_at",
+		Type:    "DATETIME",
+		Default: "CURRENT_TIMESTAMP",
+	})
+
+	bp.metadata = append(bp.metadata, &meta{
+		Name:     "updated_at",
+		Type:     "DATETIME",
+		Nullable: true,
+		Default:  "NULL",
+	})
 }
 
 func (bp *Blueprint) Nullable() interfaces.Blueprint {
-	bp.columns[len(bp.columns)-1] = strings.Replace(bp.columns[len(bp.columns)-1], "NOT NULL", "", 1)
+	bp.metadata[len(bp.metadata)-1].Nullable = true
 	return bp
 }
 
 func (bp *Blueprint) Default(value interface{}) interfaces.Blueprint {
-	bp.columns[len(bp.columns)-1] += fmt.Sprintf(" DEFAULT '%v'", value)
+	bp.metadata[len(bp.metadata)-1].Default = fmt.Sprintf("'%v'", value)
 	return bp
 }
 
 func (bp *Blueprint) DropColumn(column string) {
-	bp.dropColumns = append(bp.dropColumns, fmt.Sprintf("`%s`", column))
+	bp.metadata = append(bp.metadata, &meta{
+		Name: column,
+		Type: "DROP",
+	})
 }
 
-func (bp *Blueprint) getAlters() []string {
-	return bp.alters
-}
-
-func (bp *Blueprint) getColumns() []string {
-	return bp.columns
-}
-
-func (bp *Blueprint) getDropColumns() []string {
-	return bp.dropColumns
+func (bp *Blueprint) GetSqls(table string, operation operation) []string {
+	return operation.generateSql(table, bp.metadata)
 }

@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/laijunbin/go-migrate/pkg/interfaces"
 	mysql_interfaces "github.com/laijunbin/go-migrate/pkg/lib/mysql/interfaces"
@@ -33,13 +32,8 @@ func createWithDriver(driver mysql_interfaces.Driver, table string, schemaFunc f
 
 	blueprint := NewBlueprint().(*Blueprint)
 	schemaFunc(blueprint)
-	sql := fmt.Sprintf("CREATE TABLE `%s` (%s);", table, strings.Join(blueprint.getColumns(), ","))
-	if _, err := driver.Execute(sql); err != nil {
-		return err
-	}
-
-	for _, alter := range blueprint.getAlters() {
-		sql := fmt.Sprintf("ALTER TABLE `%s` %s;", table, alter)
+	sqls := blueprint.GetSqls(table, metaOperations.CREATE)
+	for _, sql := range sqls {
 		if _, err := driver.Execute(sql); err != nil {
 			return err
 		}
@@ -67,24 +61,8 @@ func tableWithDriver(driver mysql_interfaces.Driver, table string, schemaFunc fu
 	blueprint := NewBlueprint().(*Blueprint)
 	schemaFunc(blueprint)
 
-	columns := blueprint.getColumns()
-	if len(columns) > 0 {
-		sql := fmt.Sprintf("ALTER TABLE `%s` ADD %s;", table, strings.Join(columns, ", ADD "))
-		if _, err := driver.Execute(sql); err != nil {
-			return err
-		}
-	}
-
-	dropColumns := blueprint.getDropColumns()
-	if len(dropColumns) > 0 {
-		sql := fmt.Sprintf("ALTER TABLE `%s` DROP %s;", table, strings.Join(dropColumns, ", DROP "))
-		if _, err := driver.Execute(sql); err != nil {
-			return err
-		}
-	}
-
-	for _, alter := range blueprint.getAlters() {
-		sql := fmt.Sprintf("ALTER TABLE `%s` %s;", table, alter)
+	sqls := blueprint.GetSqls(table, metaOperations.ALTER)
+	for _, sql := range sqls {
 		if _, err := driver.Execute(sql); err != nil {
 			return err
 		}

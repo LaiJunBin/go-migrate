@@ -11,7 +11,7 @@ require (
 
 require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/laijunbin/go-solve-kit v0.1.0 // indirect
+	github.com/laijunbin/go-solve-kit v0.2.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
 )

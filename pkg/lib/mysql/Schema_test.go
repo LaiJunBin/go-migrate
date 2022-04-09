@@ -44,9 +44,7 @@ func TestCreate(t *testing.T) {
 	})
 
 	expectedSqls := []string{
-		"CREATE TABLE `users` (`id` INT(10) NOT NULL,`description` TEXT ,`amount` INT(10) NOT NULL DEFAULT '0',`name` VARCHAR(100) NOT NULL,`enable` TINYINT NOT NULL DEFAULT '0',`birthday` DATE NOT NULL,`last_login_at` DATETIME ,`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME NULL);",
-		"ALTER TABLE `users` ADD PRIMARY KEY (`id`);",
-		"ALTER TABLE `users` MODIFY `id` INT(10) NOT NULL AUTO_INCREMENT;",
+		"CREATE TABLE `users` (`id` INT(10) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`id`), `description` TEXT, `amount` INT(10) NOT NULL DEFAULT '0', `name` VARCHAR(100) NOT NULL, `enable` TINYINT NOT NULL DEFAULT '0', `birthday` DATE NOT NULL, `last_login_at` DATETIME, `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT NULL);",
 	}
 
 	sqls := driver.GetSqls()
@@ -69,8 +67,7 @@ func TestTable(t *testing.T) {
 	})
 
 	expectedSqls := []string{
-		"ALTER TABLE `users` ADD `name` INT(10) NOT NULL, ADD `price` VARCHAR(100) NOT NULL;",
-		"ALTER TABLE `users` DROP `description`, DROP `enable`;",
+		"ALTER TABLE `users` ADD `name` INT(10) NOT NULL, ADD `price` VARCHAR(100) NOT NULL, DROP `description`, DROP `enable`;",
 	}
 
 	sqls := driver.GetSqls()
