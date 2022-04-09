@@ -134,7 +134,10 @@ func (o *alterOperation) generateSql(table string, metadata []*meta) []string {
 		}
 
 		if m.Primary {
-			s += " PRIMARY KEY"
+			if s != "" {
+				s += ", "
+			}
+			s += fmt.Sprintf("ADD PRIMARY KEY (`%s`)", m.Name)
 		}
 
 		if m.Default != nil {

@@ -128,6 +128,29 @@ func TestAlterProductsTable(t *testing.T) {
 	checkSqlsMatch(t, sqls, expectedSqls)
 }
 
+func TestAlterTablePrimary(t *testing.T) {
+	driver, _ := mysql.NewMockDriver()
+	defer checkDriverClosed(t, driver)
+
+	schema := &mysql.Schema_test{}
+	schema.Table(driver, "products", func(table interfaces.Blueprint) {
+		table.Id("auto_id", 10)
+		table.Primary("id")
+		table.Index("user_id")
+		table.Unique("user_id")
+	})
+
+	expectedSqls := []string{
+		"ALTER TABLE `products` ADD `auto_id` INT(10) NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`auto_id`), ADD PRIMARY KEY (`id`), ADD INDEX (`user_id`), ADD UNIQUE (`user_id`);",
+	}
+
+	sqls := driver.GetSqls()
+
+	t.Logf("sqls: %v", sqls)
+
+	checkSqlsMatch(t, sqls, expectedSqls)
+}
+
 func TestDropIfExists(t *testing.T) {
 	driver, _ := mysql.NewMockDriver()
 	defer checkDriverClosed(t, driver)
