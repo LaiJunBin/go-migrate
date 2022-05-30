@@ -36,7 +36,7 @@ func (o *createOperation) generateSql(table string, metadata []*meta) []string {
 		}
 
 		if m.Foreign != nil {
-			return m.Foreign.generateSql(m.Name)
+			return m.Foreign.generateSql(table, m.Name)
 		}
 
 		s := ""
@@ -106,14 +106,14 @@ func (o *alterOperation) generateSql(table string, metadata []*meta) []string {
 			}
 
 			if m.Foreign != nil {
-				return fmt.Sprintf("DROP FOREIGN KEY `%[1]s`, DROP INDEX `%[1]s`", fmt.Sprintf("fk_%s", m.Name))
+				return fmt.Sprintf("DROP FOREIGN KEY `%[1]s`, DROP INDEX `%[1]s`", fmt.Sprintf("fk_%s_%s", table, m.Name))
 			}
 
 			return fmt.Sprintf("DROP `%s`", m.Name)
 		}
 
 		if m.Foreign != nil {
-			return fmt.Sprintf("ADD %s", m.Foreign.generateSql(m.Name))
+			return fmt.Sprintf("ADD %s", m.Foreign.generateSql(table, m.Name))
 		}
 
 		s := ""

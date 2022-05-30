@@ -9,9 +9,9 @@ type foreignMeta struct {
 	OnDelete  string
 }
 
-func (fm *foreignMeta) generateSql(name string) string {
+func (fm *foreignMeta) generateSql(table string, name string) string {
 	s := fmt.Sprintf("CONSTRAINT `%s` FOREIGN KEY (`%s`) REFERENCES `%s`(`%s`)",
-		fmt.Sprintf("fk_%s", name),
+		fmt.Sprintf("fk_%s_%s", table, name),
 		name,
 		fm.Table,
 		fm.Reference,

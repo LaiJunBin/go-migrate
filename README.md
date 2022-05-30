@@ -411,7 +411,7 @@ The above will generate the following sql:
 ```sql
 ALTER TABLE `projects` 
 	ADD `user_id` INT(10) NOT NULL,
-    ADD CONSTRAINT `fk_user_id` FOREIGN KEY(`user_id`) REFERENCES `users`(`id`) ON UPDATE CASCADE;
+    ADD CONSTRAINT `fk_projects_user_id` FOREIGN KEY(`user_id`) REFERENCES `users`(`id`) ON UPDATE CASCADE;
 ```
 
 ## Seeding

@@ -70,7 +70,7 @@ func TestCreateProductsTable(t *testing.T) {
 	})
 
 	expectedSqls := []string{
-		"CREATE TABLE `products` (`id` VARCHAR(20) NOT NULL, PRIMARY KEY (`id`), `user_id` INT(10) NOT NULL, CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `category_id` INT(10) NOT NULL, INDEX (`category_id`), `enable` TINYINT NOT NULL DEFAULT '1', `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT NULL);",
+		"CREATE TABLE `products` (`id` VARCHAR(20) NOT NULL, PRIMARY KEY (`id`), `user_id` INT(10) NOT NULL, CONSTRAINT `fk_products_user_id` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `category_id` INT(10) NOT NULL, INDEX (`category_id`), `enable` TINYINT NOT NULL DEFAULT '1', `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT NULL);",
 	}
 
 	sqls := driver.GetSqls()
@@ -118,7 +118,7 @@ func TestAlterProductsTable(t *testing.T) {
 	})
 
 	expectedSqls := []string{
-		"ALTER TABLE `products` ADD `price` INT(10) NOT NULL, DROP PRIMARY KEY, DROP FOREIGN KEY `fk_user_id`, DROP INDEX `fk_user_id`, DROP INDEX `category_id`, ADD INDEX (`user_id`);",
+		"ALTER TABLE `products` ADD `price` INT(10) NOT NULL, DROP PRIMARY KEY, DROP FOREIGN KEY `fk_products_user_id`, DROP INDEX `fk_products_user_id`, DROP INDEX `category_id`, ADD INDEX (`user_id`);",
 	}
 
 	sqls := driver.GetSqls()
