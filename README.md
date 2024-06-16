@@ -299,6 +299,9 @@ type Blueprint interface {
 	String(name string, length int) Blueprint
 	Text(name string) Blueprint
 	Integer(name string, length int) Blueprint
+	Float(name string, length int, precision int) Blueprint
+	Double(name string, length int, precision int) Blueprint
+	Decimal(name string, length int, precision int) Blueprint
 	Date(name string) Blueprint
 	Boolean(name string) Blueprint
 	DateTime(name string) Blueprint
@@ -322,6 +325,9 @@ The interface defines follows:
 * String: Create a `string` equivalent column.
 * Text: Create a `text` equivalent column.
 * Integer: Create an `int` equivalent column.
+* Float: Create a `float` equivalent column.
+* Double: Create a `double` equivalent column.
+* Decimal: Create a `decimal` equivalent column.
 * Date: Create a `date` equivalent column.
 * Boolean: Create a `boolean` equivalent column.
 * DateTime: Create a `datetime` equivalent column.

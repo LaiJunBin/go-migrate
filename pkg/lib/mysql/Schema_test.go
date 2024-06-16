@@ -202,3 +202,49 @@ func TestCreateUsersTableAndSeed(t *testing.T) {
 
 	checkSqlsMatch(t, sqls, expectedSqls)
 }
+
+func TestCreateFloatingsTable(t *testing.T) {
+	driver, _ := mysql.NewMockDriver()
+	defer checkDriverClosed(t, driver)
+
+	schema := &mysql.Schema_test{}
+	schema.Create(driver, "floatings", func(table interfaces.Blueprint) {
+		table.Id("id", 10)
+		table.Float("price", 10, 2)
+		table.Double("amount", 10, 2)
+		table.Decimal("total", 10, 2)
+		table.Timestamps()
+	})
+
+	expectedSqls := []string{
+		"CREATE TABLE `floatings` (`id` INT(10) NOT NULL AUTO_INCREMENT, PRIMARY KEY (`id`), `price` FLOAT(10, 2) NOT NULL, `amount` DOUBLE(10, 2) NOT NULL, `total` DECIMAL(10, 2) NOT NULL, `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT NULL);",
+	}
+
+	sqls := driver.GetSqls()
+
+	t.Logf("sqls: %v", sqls)
+
+	checkSqlsMatch(t, sqls, expectedSqls)
+}
+
+func TestAlterFloatingsTable(t *testing.T) {
+	driver, _ := mysql.NewMockDriver()
+	defer checkDriverClosed(t, driver)
+
+	schema := &mysql.Schema_test{}
+	schema.Table(driver, "floatings", func(table interfaces.Blueprint) {
+		table.Float("price", 8, 2)
+		table.Double("amount", 10, 2)
+		table.Decimal("total", 16, 4)
+	})
+
+	expectedSqls := []string{
+		"ALTER TABLE `floatings` ADD `price` FLOAT(8, 2) NOT NULL, ADD `amount` DOUBLE(10, 2) NOT NULL, ADD `total` DECIMAL(16, 4) NOT NULL;",
+	}
+
+	sqls := driver.GetSqls()
+
+	t.Logf("sqls: %v", sqls)
+
+	checkSqlsMatch(t, sqls, expectedSqls)
+}

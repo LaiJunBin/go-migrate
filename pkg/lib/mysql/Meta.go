@@ -10,6 +10,7 @@ type meta struct {
 	Name          string
 	Type          string
 	Length        int
+	Precision     int
 	Nullable      bool
 	Unique        bool
 	Index         bool
@@ -45,7 +46,11 @@ func (o *createOperation) generateSql(table string, metadata []*meta) []string {
 		}
 
 		if m.Length != 0 {
-			s += fmt.Sprintf("(%d)", m.Length)
+			if m.Precision != 0 {
+				s += fmt.Sprintf("(%d, %d)", m.Length, m.Precision)
+			} else {
+				s += fmt.Sprintf("(%d)", m.Length)
+			}
 		}
 
 		if s != "" && !m.Nullable {
@@ -122,7 +127,11 @@ func (o *alterOperation) generateSql(table string, metadata []*meta) []string {
 		}
 
 		if m.Length != 0 {
-			s += fmt.Sprintf("(%d)", m.Length)
+			if m.Precision != 0 {
+				s += fmt.Sprintf("(%d, %d)", m.Length, m.Precision)
+			} else {
+				s += fmt.Sprintf("(%d)", m.Length)
+			}
 		}
 
 		if s != "" && !m.Nullable {

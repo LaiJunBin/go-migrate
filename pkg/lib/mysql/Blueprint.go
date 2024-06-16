@@ -51,6 +51,36 @@ func (bp *Blueprint) Integer(name string, length int) interfaces.Blueprint {
 	return bp
 }
 
+func (bp *Blueprint) Float(name string, length int, precision int) interfaces.Blueprint {
+	bp.metadata = append(bp.metadata, &meta{
+		Name:      name,
+		Type:      "FLOAT",
+		Length:    length,
+		Precision: precision,
+	})
+	return bp
+}
+
+func (bp *Blueprint) Double(name string, length int, precision int) interfaces.Blueprint {
+	bp.metadata = append(bp.metadata, &meta{
+		Name:      name,
+		Type:      "DOUBLE",
+		Length:    length,
+		Precision: precision,
+	})
+	return bp
+}
+
+func (bp *Blueprint) Decimal(name string, length int, precision int) interfaces.Blueprint {
+	bp.metadata = append(bp.metadata, &meta{
+		Name:      name,
+		Type:      "DECIMAL",
+		Length:    length,
+		Precision: precision,
+	})
+	return bp
+}
+
 func (bp *Blueprint) Date(name string) interfaces.Blueprint {
 	bp.metadata = append(bp.metadata, &meta{
 		Name: name,

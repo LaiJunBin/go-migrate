@@ -5,6 +5,9 @@ type Blueprint interface {
 	String(name string, length int) Blueprint
 	Text(name string) Blueprint
 	Integer(name string, length int) Blueprint
+	Float(name string, length int, precision int) Blueprint
+	Double(name string, length int, precision int) Blueprint
+	Decimal(name string, length int, precision int) Blueprint
 	Date(name string) Blueprint
 	Boolean(name string) Blueprint
 	DateTime(name string) Blueprint
